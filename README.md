@@ -1,4 +1,4 @@
-# TWRP Device Tree — vivo X300 (PD2551)
+# TWRP Device Tree — iQOO Z11 (PD2551)
 
 > 基于官方全量包逆向参数重建的 TWRP 设备树
 > 固件：`2026102202052126bf8bcc2539c42962ab93fde7f4e5be.zip`
