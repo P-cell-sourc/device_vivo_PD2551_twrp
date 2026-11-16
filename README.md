@@ -8,7 +8,7 @@
 
 | 项目 | 参数 | 来源 |
 | --- | --- | --- |
-| 机型 | vivo X300（中国版） | 官方固件 |
+| 机型 | iQOO Z11（中国版） | 官方固件 |
 | 项目代号 | PD2551（硬件 PD2551MA） | `META-INF/com/android/metadata` |
 | 平台 | MediaTek **MT6899**（天玑 9500，3nm） | `vendor_boot` DTB `mediatek,MT6899` |
 | 主板 | **k6899v1_64** | `lk.img` 字符串 |
