@@ -1,0 +1,11 @@
+ro.mediatek.platform=MT6899
+ro.vendor.mediatek.platform=MT6899
+ro.hardware=mt6899
+ro.board.platform=mt6899
+ro.boot.dynamic_partitions=true
+ro.author=Cuoxianxu
+fbe.metadata.wrappedkey=true
+ro.postinstall.fstab.prefix=/system
+ro.vivo.product.release.name=PD2551
+ro.vivo.os.build.display.id=OriginOS 6
+ro.sf.lcd_density=560

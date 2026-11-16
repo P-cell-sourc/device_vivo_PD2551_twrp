@@ -1,0 +1,26 @@
+# vivo X300 (PD2551) / MT6899 recovery init
+import /init.recovery.touch.rc
+import /init.recovery.trustonic.rc
+
+# TWRP init.rc 不会自动 import /system/etc/init，此处显式加载
+# （文件位于 ramdisk 内 /system/etc/init，/vendor 由 recovery/root/vendor 覆盖）
+import /system/etc/init/trustonic.rc
+import /system/etc/init/tee.rc
+import /system/etc/init/android.hardware.boot-service.mtk.rc
+import /system/etc/init/android.hardware.gatekeeper-service.trustonic.rc
+import /system/etc/init/android.hardware.security.keymint@3.0-service.trustonic.rc
+import /system/etc/init/vendor.vivo.hardware.vibrator.custom.service.rc
+
+on early-init
+    # 恢复环境限频，降低发热（值取自同平台 stock 配置，写入失败会自动忽略）
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq 1200000
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1800000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_min_freq 1500000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 2600000
+    write /sys/devices/system/cpu/cpufreq/policy7/scaling_max_freq 2700000
+    write /sys/class/devfreq/mtk-dvfsrc-devfreq/userspace/set_freq 0
+
+on post-fs
+    start health-hal-2-1
+    start vendor.vibrator-default
+    start vendor.boot-default
