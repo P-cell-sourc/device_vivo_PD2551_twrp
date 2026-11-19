@@ -6,35 +6,35 @@
 #   MTK 把 .ko 放在 /lib/modules/6.6-gki/ 下，而 AOSP first stage init 只认
 #   /lib/modules/<name>.ko 这种平铺路径，报 "module bootprof can't be loaded"，
 #   结果是 recovery 里一个模块都没加载，TWRP 初始化图形失败后 exit(1)。
-#   MTK 自己给 recovery 备了一份 286 条的 modules.load.recovery，这里按它加载。
+#   MTK 自己给 recovery 备了一份 286 条的清单，构建时被另存为
+#   modules.load.twrp（原 modules.load.recovery 被精简成 3 条给 first stage 用），
+#   这里就按那份全量清单加载。
 
 # init 的 exec 子进程 stdout 通常已是 /dev/kmsg，再显式指一次，防止被丢进 /dev/null
 [ -e /dev/kmsg ] && exec 1>/dev/kmsg 2>&1
 
 log() { echo "[twrp-fix] $*"; }
 
-# ── 1. 找模块目录与清单：优先 modules.load.recovery，其次 modules.load
+# ── 1. 找模块目录与清单
+#   顺序很重要：first stage 会把 modules.load.recovery 精简成 3 条（否则 init
+#   加载失败直接 panic），全量 286 条被另存为 modules.load.twrp，所以必须先找它。
 D=""
 L=""
 for d in /lib/modules/*/ ; do
-    if [ -f "$d/modules.load.recovery" ]; then
-        D="$d"; L="${d}modules.load.recovery"; break
-    fi
-done
-if [ -z "$L" ]; then
-    for d in /lib/modules/*/ ; do
-        if [ -f "$d/modules.load" ]; then
-            D="$d"; L="${d}modules.load"; break
+    [ -d "$d" ] || continue
+    for f in modules.load.twrp modules.load.recovery modules.load; do
+        if [ -f "$d$f" ]; then
+            D="$d"; L="$d$f"; break 2
         fi
     done
-fi
+done
 # 兜底：清单直接平铺在 /lib/modules/ 下
 if [ -z "$L" ]; then
-    if [ -f /lib/modules/modules.load.recovery ]; then
-        L=/lib/modules/modules.load.recovery; D=/lib/modules/
-    elif [ -f /lib/modules/modules.load ]; then
-        L=/lib/modules/modules.load; D=/lib/modules/
-    fi
+    for f in modules.load.twrp modules.load.recovery modules.load; do
+        if [ -f "/lib/modules/$f" ]; then
+            L="/lib/modules/$f"; D=/lib/modules/; break
+        fi
+    done
 fi
 
 if [ -z "$L" ]; then
