@@ -4,9 +4,16 @@ service prepdecrypt /system/bin/prepdecrypt.sh
      disabled
      oneshot
      seclabel u:r:recovery:s0
+service twrp-modules /system/bin/twrp-modules.sh
+     user root
+     group root
+     disabled
+     oneshot
+     seclabel u:r:recovery:s0
 
 on fs
      chmod 0755  /system/bin/prepdecrypt.sh
+     chmod 0755  /system/bin/twrp-modules.sh
      start prepdecrypt
 
 on property:crypto.ready=1
