@@ -196,19 +196,6 @@ TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
 TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
 TW_MAX_BRIGHTNESS := 2047
 
-# Recovery 运行期缺失的间接依赖库
-#   实测 ramdisk 里 /system/bin/recovery 的依赖闭包缺这两个 .so，动态链接器在
-#   __linker_init 阶段直接 exit(1)：进程只活 4~8ms，没有任何 stdout/stderr，
-#   屏幕就一直停在 bootloader 画的 logo 上，而 adbd 依旧可用（所以看起来像
-#   "能进 adb 但黑屏"）。
-#     recovery -> android.security.maintenance-ndk.so -> android.system.keystore2-V4-ndk.so
-#     recovery -> libtar.so -> libkeystore-attestation-application-id.so
-#                          -> android.security.aaid_aidl-cpp.so
-#   两者都是 DT_NEEDED 里的间接依赖，AOSP 只安装直接依赖，故显式加入 recovery。
-TARGET_RECOVERY_DEVICE_MODULES += \
-    android.security.aaid_aidl-cpp \
-    android.system.keystore2-V4-ndk
-
 # FastbootD
 TW_INCLUDE_FASTBOOTD := true
 
