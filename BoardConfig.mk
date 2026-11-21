@@ -165,18 +165,22 @@ BOARD_SUPPRESS_SECURE_ERASE := true
 BOARD_AVB_ENABLE := true
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 0
 
-# 顶层 vbmeta 链式验证 vbmeta_system。
-# chained partition 自身必须同时给出 KEY_PATH 与 ALGORITHM，否则 soong 在 bootstrap
-# 阶段就会失败（fsgen 校验整条 chain）：
-#   error: build/soong/fsgen/Android.bp:32:1: module "soong_filesystem_creator":
-#          No key found for chained avb partition "vbmeta_system"
-BOARD_AVB_VBMETA_SYSTEM := system
+# !! system 不能写进 BOARD_AVB_VBMETA_SYSTEM !!
+#   build/make/core/Makefile 的 check-and-set-avb-args：
+#     若分区既定义了 BOARD_AVB_<P>_KEY_PATH，又出现在 chained vbmeta 列表里 →
+#       error: Chaining partition "system" in chained VBMeta image is not supported
+#   AOSP 的约定是 system 由**顶层** vbmeta 直接 chain（见下面的 BOARD_AVB_SYSTEM_*），
+#   BOARD_AVB_VBMETA_SYSTEM 只列真正住在 vbmeta_system 里的分区（system_ext/product 等）。
+#   本设备只产出 vendor_boot.img，vbmeta_system 不参与刷机，留空最稳。
+# chained partition 自身仍需 KEY_PATH + ALGORITHM，否则 soong bootstrap 阶段会报
+#   fsgen: No key found for chained avb partition "vbmeta_system"
+BOARD_AVB_VBMETA_SYSTEM :=
 BOARD_AVB_VBMETA_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
 BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA2048
 BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := 0
 BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 1
 
-# vbmeta_system 所链的叶子分区同样需要各自的 key，缺一个就换成分区名报同样的错
+# system：顶层 vbmeta 直接 chain（不在 vbmeta_system 里）
 BOARD_AVB_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
 BOARD_AVB_SYSTEM_ALGORITHM := SHA256_RSA2048
 BOARD_AVB_SYSTEM_ROLLBACK_INDEX := 0
