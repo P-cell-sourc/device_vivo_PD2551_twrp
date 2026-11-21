@@ -14,7 +14,7 @@ service twrp-modules /system/bin/twrp-modules.sh
 on fs
      chmod 0755  /system/bin/prepdecrypt.sh
      chmod 0755  /system/bin/twrp-modules.sh
-     start twrp-modules.sh
+     start twrp-modules
      start prepdecrypt
 
 on property:crypto.ready=1

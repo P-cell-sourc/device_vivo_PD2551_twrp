@@ -164,7 +164,24 @@ BOARD_SUPPRESS_SECURE_ERASE := true
 # AVB
 BOARD_AVB_ENABLE := true
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 0
+
+# 顶层 vbmeta 链式验证 vbmeta_system。
+# chained partition 自身必须同时给出 KEY_PATH 与 ALGORITHM，否则 soong 在 bootstrap
+# 阶段就会失败（fsgen 校验整条 chain）：
+#   error: build/soong/fsgen/Android.bp:32:1: module "soong_filesystem_creator":
+#          No key found for chained avb partition "vbmeta_system"
 BOARD_AVB_VBMETA_SYSTEM := system
+BOARD_AVB_VBMETA_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
+BOARD_AVB_VBMETA_SYSTEM_ALGORITHM := SHA256_RSA2048
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX := 0
+BOARD_AVB_VBMETA_SYSTEM_ROLLBACK_INDEX_LOCATION := 1
+
+# vbmeta_system 所链的叶子分区同样需要各自的 key，缺一个就换成分区名报同样的错
+BOARD_AVB_SYSTEM_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
+BOARD_AVB_SYSTEM_ALGORITHM := SHA256_RSA2048
+BOARD_AVB_SYSTEM_ROLLBACK_INDEX := 0
+BOARD_AVB_SYSTEM_ROLLBACK_INDEX_LOCATION := 2
+
 BOARD_AVB_VENDOR_BOOT_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
 BOARD_AVB_VENDOR_BOOT_ALGORITHM := SHA256_RSA2048
 BOARD_AVB_VENDOR_BOOT_ROLLBACK_INDEX := 0
@@ -212,6 +229,9 @@ TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_CRYPTO_FBE := true
 TW_INCLUDE_FBE_METADATA_DECRYPT := true
 TW_PREPARE_DATA_MEDIA_EARLY := true
+# Android 12+ 的 /data 使用 fscrypt policy v2；漏掉这行会表现为输入密码后
+# 一直转圈或直接挂载失败，而不是明确报错
+TW_USE_FSCRYPT_POLICY := 2
 
 # StatusBar
 TW_STATUS_ICONS_ALIGN := center
