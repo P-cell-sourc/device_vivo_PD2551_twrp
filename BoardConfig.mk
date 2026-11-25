@@ -162,8 +162,16 @@ BOARD_ROOT_EXTRA_FOLDERS += metadata
 BOARD_SUPPRESS_SECURE_ERASE := true
 
 # AVB
-BOARD_AVB_ENABLE := true
-BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 0
+# AVB 全部关闭。
+# vivo/MTK 的 bootloader 会用 vbmeta 里的 hash descriptor 校验 vendor_boot，
+# 而 TWRP 只能拿 AOSP 测试密钥签名，hash 必然对不上，结果就是卡 logo / 无限重启。
+# 关闭后 vendor_boot 不再生成 AVB footer；刷机时再配一个 flags=3 的 vbmeta，
+# bootloader 就会跳过全部校验（TWRP 本来也不需要 dm-verity）。
+# 注意：下面这些 chained 变量要保留，删掉会让 fsgen 在 bootstrap 阶段
+# 报 "No key found for chained avb partition"，那是另一个错误。
+BOARD_AVB_ENABLE := false
+# flags 位：1 = hashtree 校验关闭，2 = verification 关闭，3 = 两者都关
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
 
 # !! system 不能写进 BOARD_AVB_VBMETA_SYSTEM !!
 #   build/make/core/Makefile 的 check-and-set-avb-args：
